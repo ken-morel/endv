@@ -5,7 +5,7 @@ build jcc library with clang.
 """
 function buildjcc()::Cint
   jccsource = "lib/jcclib/jcclib.c"
-  output = "endv/jcc/jcclib.so"
+  output = "jcclib.so"
   println(Core.stdout, "Compiling jcclib.c...")
   try
     mkpath(dirname(output))
@@ -28,7 +28,21 @@ function buildjcc()::Cint
   end
 end
 
+function buildnrun(args::Vector{String})::Cint
+  buildjcc()
+  @time trimpile()
+  println(Core.stdout, "Running endv with args $args")
+  try
+    run(`./endv $args`)
+    0
+  catch
+    println(Core.stdout, "could not run endv")
+    10
+  end
+end
+
 function runendv()::Cint
+  println(Core.stdout, "running with julia")
   try
     run(`julia src/main.jl`)
     0
@@ -39,8 +53,9 @@ function runendv()::Cint
 end
 
 function trimpile()::Cint
+  println(Core.stdout, "trimpiling")
   try
-    run(`julia +nightly juliac/juliac.jl --experimental --output-exe endv --trim src/main.jl`)
+    run(`julia +nightly juliac/juliac.jl --experimental --output-exe endv --trim=safe src/main.jl`)
     0
   catch
     println(Core.stdout, "Error running trimpile: ")
@@ -53,13 +68,15 @@ function (@main)(args::Vector{String})::Cint
     println(Core.stdout, "Usage: $(args[1]) command")
     1
   else
-    command = args[end]
-    if command == "buildjcc"
+    command = args[1]
+    @time if command == "buildjcc"
       buildjcc()
     elseif command == "run"
       runendv()
     elseif command == "trimpile"
       trimpile()
+    elseif command == "buildnrun"
+      buildnrun(args[2:end])
     else
       println(Core.stdout, "Unknown command: ", command)
       2
