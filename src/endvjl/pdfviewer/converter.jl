@@ -4,5 +4,5 @@ function pageimagecache(pdfcache::String, page::UInt)
 end
 
 cachepdfpagetoimage(pdf::String, page::UInt, output::String) = system([
-  getimagemagic(), "$pdf[$(page - 1)]", output
+  getimagemagic(), "-density", "300", "-quality", "100", "-flatten", "-background", "white", "$pdf[$(page - 1)]", output
 ])

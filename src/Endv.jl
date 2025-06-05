@@ -2,6 +2,10 @@ module Endv
 using SHA: sha1
 using ..Jcc: print, println, prompt, system, sleep, forkcmd, isprocessrunning, killpid
 
+function openexternally(path::String)::Cint
+      system(["swaymsg", "exec", "xdg-open", path])
+end
+
 include("endvjl/cache.jl")
 
 include("endvjl/imagemagic.jl")

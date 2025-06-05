@@ -111,6 +111,8 @@ function handleinput!(player::AudioPlayer)
     catch
       println("Error sending STOP signal")
     end
+  elseif input == "S"
+    openexternally(player.path)
   elseif input == "q"
     println("Quitting Julia control loop. ffplay may continue playing at $(player.processid) if not stopped.")
     player.shouldrun = false

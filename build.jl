@@ -88,7 +88,7 @@ function install(binpath::String)::Cint
   0
 end
 
-function (@main)(args::Vector{String})::Cint
+function @main(args::Vector{String})::Cint
   if length(args) < 1
     println(Core.stdout, "Usage: $(args[1]) command")
     1
@@ -110,5 +110,4 @@ function (@main)(args::Vector{String})::Cint
       2
     end
   end
-
 end

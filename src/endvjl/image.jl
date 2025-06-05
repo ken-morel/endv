@@ -14,10 +14,18 @@ function converttogif(path::String)
 end
 
 
-function viewimagewithchafa(path::String)::Cint
+function viewimagewithchafa(path::String, fullwidth::Bool=false)::Cint
+  cmd::Vector{String} = ["chafa", "--align=mid,mid", "--work=9", "--symbols=all"]
+  fullwidth && push!(cmd, "--fit-width")
+  push!(cmd, path)
   try
-    system(["chafa", path])
-    prompt("hit enter to exit> ")
+    system(cmd)
+    input = prompt("hit enter to exit> ")
+    if input == "S"
+      openexternally(path)
+    elseif input == "f"
+      viewimagewithchafa(path, !fullwidth)
+    end
   catch
     println("Exciting gracefully")
   end

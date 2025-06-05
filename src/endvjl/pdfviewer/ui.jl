@@ -12,7 +12,10 @@ function show(view::PdfViewer)
   if !isfile(imagepath)
     cachepdfpagetoimage(view.pdfinfo.path, view.currentpage, imagepath)
   end
-  system(["chafa", imagepath])
+  cmd = ["chafa", "--align=mid,mid", "--work=9", "--symbols=all"]
+  view.fullwidth && push!(cmd, "--fit-width")
+  push!(cmd, imagepath)
+  system(cmd)
   println("Page $(view.currentpage) of $(view.pdfinfo.npages)")
 end
 
@@ -38,6 +41,11 @@ function handleinput!(view::PdfViewer)::Bool
     rm(view.cachefolder; recursive=true)
     mkpath(view.cachefolder)
     false
+  elseif entry == "f"
+    view.fullwidth = !view.fullwidth
+    true
+  elseif entry == "S"
+    openexternally(view.pdfinfo.path)
   else
     try
       page = parse(UInt, entry)
