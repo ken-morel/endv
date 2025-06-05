@@ -70,8 +70,14 @@ function install(binpath::String)::Cint
     return 1
   end
   open(binpath, "w") do file
-    println(file, "#!/usr/bin/sh\n")
-    println(file, "$exepath")
+    println(
+      file,
+      """#!/bin/bash
+      exec '$exepath' "\$@"
+      echo "Error: Could not execute endv at $exepath"
+      exit 1
+      """
+    )
   end
   println("Script succescully generated, trying make it executable")
   try

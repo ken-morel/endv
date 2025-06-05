@@ -81,16 +81,14 @@ function toggleplay!(player::AudioPlayer)
       killpid(player.processid, SIGTSTP)
       player.playing = false
     catch e
-      showerror(Core.stdout, e)
-      println("Error sending stop signap to player $e")
+      println("Error sending stop signap to player")
     end
   else
     try
       killpid(player.processid, SIGCONT)
       player.playing = true
-    catch e
-      showerror(Core.stdout, e)
-      println("Error sending play signal to player $e")
+    catch
+      println("Error sending play signal to player")
     end
   end
 end
