@@ -1,7 +1,7 @@
 include("./Jcc.jl")
 include("./Endv.jl")
 
-using .Jcc: print, println, prompt
+using .Jcc: print, println, prompt, setjccpath
 using .Endv: viewfile
 
 function @main(args::Vector{String})::Cint
@@ -10,6 +10,7 @@ function @main(args::Vector{String})::Cint
     1
   else
     input_file = args[2]
+    setjccpath(joinpath(first(splitdir(args[1])), "jcclib.so"))
     viewfile(input_file)
   end
 end
