@@ -7,7 +7,9 @@ uses jcclib.
 module Jcc
 export setjccpath, prompt, print, println
 
+combinecmd(parts::Vector{<:Any})::String = first(parts) * " " * join(parts[2:end] .|> String .|> shellescape, " ")
 jccpath::String = "./jcclib.so"
+
 function setjccpath(path::String)
   global jccpath = path
 end
@@ -39,12 +41,12 @@ function prompt(prompttext::String; buffersize::Int=256)::Union{String,Nothing}
       buffersize
     )::Cstring
     if inputα == C_NULL
-      println(Core.stdout, "Got no input from jcclib")
+      println("Got no input from jcclib")
       nothing
     else
       input::String = unsafe_string(inputα)
-      ccall( #free the C pointer, not knowing how to do in julia yet.
-        (:free_prompt_input, jccpath),
+      ccall(
+        (:freestr, jccpath),
         Cvoid,
         (Cstring,),
         inputα
@@ -52,7 +54,7 @@ function prompt(prompttext::String; buffersize::Int=256)::Union{String,Nothing}
       input
     end
   catch
-    println(Core.stdout, "An error occured calling c library, check it is at $jccpath")
+    println("An error occured calling c library, check it is at $jccpath")
     nothing
   end
 end
@@ -63,18 +65,39 @@ end
 just call c system.
 """
 function system(command::String)
-  @ccall system(command::Cstring)::Cvoid
+  @ccall system(command::Cstring)::Cint
+end
+system(cmd::Vector{<:Any}) = system(combinecmd(cmd))
+
+forkcmd(parts::Vector{<:Any}) = forkcmd(combinecmd(parts))
+
+function forkcmd(command::String)::Cint
+  ccall(
+    (:forkcmd, jccpath),
+    Cint,
+    (Cstring,),
+    command
+  )
+end
+
+function killpid(pid::Int, signal::Int)::Cint
+  println("running command: kill -s $signal $pid")
+  system("kill -s $signal $pid")
+end
+
+function isprocessrunning(pid::Int)::Bool
+  status = system("kill -s 0 $pid")
+  if status == 0
+    true
+  else
+    false
+  end
 end
 
 shellescape(part::String)::String = "'$part'"
 
-function system(cmd::Vector{<:Any})
-  command = join(cmd .|> String .|> shellescape, " ")
-  Base.println(Core.stdout, "running $command")
-
-  system(command)
-  0
+function Jccsleep(time::Float32)
+  @ccall sleep(time::Cfloat)::Cvoid
 end
-
 
 end

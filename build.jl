@@ -41,10 +41,10 @@ function buildnrun(args::Vector{String})::Cint
   end
 end
 
-function runendv()::Cint
+function runendv(args::Vector{String})::Cint
   println(Core.stdout, "running with julia")
   try
-    run(`julia src/main.jl`)
+    run(`julia src/main.jl endv $args`)
     0
   catch
     println(Core.stdout, "Error running Endv: ")
@@ -55,12 +55,31 @@ end
 function trimpile()::Cint
   println(Core.stdout, "trimpiling")
   try
-    run(`julia +nightly juliac/juliac.jl --experimental --output-exe endv --trim=safe src/main.jl`)
+    run(`julia juliac/juliac.jl --experimental --output-exe endv --trim=safe src/main.jl`)
     0
   catch
     println(Core.stdout, "Error running trimpile: ")
     4
   end
+end
+
+function install(binpath::String)::Cint
+  exepath = joinpath("." |> abspath |> normpath, "endv")
+  if isfile(binpath)
+    println("Error, $binpath already exists, if you mean to override it, please delete manually.")
+    return 1
+  end
+  open(binpath, "w") do file
+    println(file, "#!/usr/bin/sh\n")
+    println(file, "$exepath")
+  end
+  println("Script succescully generated, trying make it executable")
+  try
+    run(`chmod +x $binpath`)
+  catch
+    println("please run chmod +x '$binpath'")
+  end
+  0
 end
 
 function (@main)(args::Vector{String})::Cint
@@ -72,11 +91,14 @@ function (@main)(args::Vector{String})::Cint
     @time if command == "buildjcc"
       buildjcc()
     elseif command == "run"
-      runendv()
+      runendv(args[2:end])
     elseif command == "trimpile"
       trimpile()
     elseif command == "buildnrun"
       buildnrun(args[2:end])
+    elseif command == "install"
+      path = get(args, 2, joinpath(homedir(), "bin/endv"))
+      install(path)
     else
       println(Core.stdout, "Unknown command: ", command)
       2

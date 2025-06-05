@@ -2,16 +2,13 @@ const CHAFA_SUPPORTED = r".*\.(png|jpe?g|tif?f|gif)$"
 const IMAGE = r".*\.(png|jpe?g|tif?f|webp|gif|svg)$"
 
 
+
 ischafasupported(path::String)::Bool = !isnothing(match(CHAFA_SUPPORTED, path))
 isimage(path::String)::Bool = !isnothing(match(IMAGE, path))
 
 function converttogif(path::String)
   gifcache = gifcachefile(path)
-  magic = if Sys.iswindows()
-    "magic"
-  else
-    "convert"
-  end
+  magic = getimagemagic()
   system([magic, path, gifcache])
   gifcache
 end
