@@ -1,4 +1,7 @@
 # endv
+
+[![wakatime](https://wakatime.com/badge/github/ken-morel/endv.svg)](https://wakatime.com/badge/github/ken-morel/endv)
+
 Hello 👋. I personally use nchat for as desktop whatsapp and yelegram client, 8n short it is a terminal client.
 
 Nchat is a simple tool which permits you to view those files possibly from your terminal, it supports:
